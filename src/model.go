@@ -65,6 +65,26 @@ func (product *Product) createProduct(db *sql.DB) error {
 	return nil
 }
 
+func deleteProduct(db *sql.DB, id int) error {
+	query := fmt.Sprintf("delete from products where id=%v", id)
+
+	result, err := db.Exec(query)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("No Such product exists")
+	}
+
+	return nil
+}
+
 func (product *Product) updateProduct(db *sql.DB) error {
 	query := fmt.Sprintf("update products set name='%v', quantity=%v, price=%v where id=%v", product.Name, product.Quantity, product.Price, product.ID)
 

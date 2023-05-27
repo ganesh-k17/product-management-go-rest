@@ -3,15 +3,12 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/gorilla/mux"
-
-	"fmt"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type App struct {
@@ -44,6 +41,7 @@ func (app *App) handleRoutes() {
 	app.Router.HandleFunc("/product/{id}", app.getProduct).Methods("GET")
 	app.Router.HandleFunc("/product", app.createProduct).Methods("POST")
 	app.Router.HandleFunc("/product/{id}", app.updateProduct).Methods("PUT")
+	app.Router.HandleFunc("/product/{id}", app.deleteProduct).Methods("Delete")
 }
 
 func sendResponse(w http.ResponseWriter, statusCode int, payload interface{}) {
@@ -71,6 +69,25 @@ func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sendResponse(w, http.StatusOK, p)
+}
+
+func (app *App) deleteProduct(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		sendError(w, http.StatusBadRequest, "Invalid product id")
+		return
+	}
+
+	err = deleteProduct(app.DB, key)
+
+	if err != nil {
+		sendError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	sendResponse(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
 func (app *App) updateProduct(w http.ResponseWriter, r *http.Request) {
