@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -44,5 +45,42 @@ func (product *Product) getProduct(db *sql.DB) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (product *Product) createProduct(db *sql.DB) error {
+	query := fmt.Sprintf("insert into products(name, quantity, price) values('%v', %v, %v)", product.Name, product.Quantity, product.Price)
+
+	result, err := db.Exec(query)
+	if err != nil {
+		return err
+	}
+	id, err := result.LastInsertId()
+
+	if err != nil {
+		return err
+	}
+
+	product.ID = int(id)
+	return nil
+}
+
+func (product *Product) updateProduct(db *sql.DB) error {
+	query := fmt.Sprintf("update products set name='%v', quantity=%v, price=%v where id=%v", product.Name, product.Quantity, product.Price, product.ID)
+
+	result, err := db.Exec(query)
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("No Such product exists")
+	}
+
 	return nil
 }
