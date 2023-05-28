@@ -11,3 +11,13 @@ Rest API for product management in GO language
 | POST      | /product    | Creates a new product based on the given information from the user and saves it to the database |
 | PUT       | /product/id | Updates the respective product with the given information from the user.                        |
 | DELETE    | /product/id | Deletes the respective product                                                                  |
+
+## To unit test the project
+
+go test
+
+## To unit test coverage
+
+```go
+go test -coverprofile fmtcoverage.html
+```
